@@ -54,7 +54,7 @@ import requests
 from xml.dom import minidom
 
 API_DOMAIN = 'https://api.prowlapp.com'
-VERSION = '0.52'
+VERSION = '0.6'
 
 class Prowl(object):
     def __init__(self, apikey, providerkey=None):

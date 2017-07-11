@@ -53,4 +53,7 @@ setup(
         version=version,
         description='Python module for Prowl iPhone notification service',
         author='Jacob Burch and Olivier Hervieu',
+        install_requires=[
+            "requests"
+        ]
 )
