@@ -50,11 +50,10 @@ which implements four methods :
 - retrieve_apikey, to get an API key from a registration token retrieved in
   retrieve/token.
 """
-from httplib import HTTPSConnection as Https
-from urllib import urlencode
+import requests
 from xml.dom import minidom
 
-API_DOMAIN = 'api.prowlapp.com'
+API_DOMAIN = 'https://api.prowlapp.com'
 VERSION = '0.52'
 
 class Prowl(object):
@@ -64,8 +63,7 @@ class Prowl(object):
         """
         self.apikey = apikey
         # Set User-Agent
-        self.headers = {'User-Agent': "Prowlpy/%s" % VERSION,
-                        'Content-type': "application/x-www-form-urlencoded"}
+        self.headers = {'User-Agent': "Prowlpy/%s" % VERSION}
 
         # Aliasing
         self.add = self.post
@@ -125,9 +123,6 @@ class Prowl(object):
           notification.
         """
 
-        # Create the http object
-        h = Https(API_DOMAIN)
-
         # Perform the request and get the response headers and content
         data = {'apikey': self.apikey,
                 'application': application,
@@ -141,17 +136,15 @@ class Prowl(object):
         if url is not None:
             data['url'] = url[0:512]  # API limits to 512 characters
 
-        h.request("POST",
-                  "/publicapi/add",
-                  headers=self.headers,
-                  body=urlencode(data))
-        response = h.getresponse()
-        request_status = response.status
+        response = requests.post(API_DOMAIN + "/publicapi/add", 
+                                 data=data, 
+                                 headers=self.headers)
+        request_status = response.status_code
 
         if request_status == 200:
             return True
         else:
-            self._relay_error(request_status, response.reason)
+            self._relay_error(request_status, response.text)
 
     def verify_key(self, providerkey=None):
         """
@@ -161,18 +154,17 @@ class Prowl(object):
         - providerkey (optional) : your provider API key.
           Only necessary if you have been whitelisted.
         """
-        h = Https(API_DOMAIN)
 
         data = {'apikey': self.apikey}
 
         if providerkey is not None:
             data['providerkey'] = providerkey
 
-        h.request("GET",
-                  "/publicapi/verify?" + urlencode(data),
-                  headers=self.headers)
+        response = requests.get(API_DOMAIN + "/publicapi/verify", 
+                                params=data, 
+                                headers=self.headers)
 
-        request_status = h.getresponse().status
+        request_status = response.status_code
 
         if request_status != 200:
             self._relay_error(request_status)
@@ -193,22 +185,19 @@ class Prowl(object):
          'url': u'https://www.prowlapp.com/retrieve.php?token=60fd5684'}
         """
 
-        h = Https(API_DOMAIN)
-
         data = {'apikey': self.apikey}
 
         if providerkey is not None:
             data['providerkey'] = providerkey
 
-        h.request("GET",
-                  "/publicapi/retrieve/token?" + urlencode(data),
-                  headers=self.headers)
+        response = requests.get(API_DOMAIN + "/publicapi/retrieve/token",
+                                params=data,
+                                headers=self.headers)
 
-        request = h.getresponse()
-        request_status = request.status
+        request_status = request.status_code
 
         if request_status == 200:
-            dom = minidom.parseString(request.read())
+            dom = minidom.parseString(request.text)
             code = dom.getElementsByTagName('prowl')[0].\
                             getElementsByTagName('success')[0].\
                             getAttribute('code')
@@ -246,8 +235,6 @@ class Prowl(object):
          'resetdate': u'1299535575'}
         """
 
-        h = Https(API_DOMAIN)
-
         data = {'apikey': self.apikey}
 
         if providerkey is not None:
@@ -261,15 +248,14 @@ class Prowl(object):
             raise Exception("Token is required for retrieving API key.\
                              Call retrieve_token to request it.")
 
-        h.request("GET",
-                  "/publicapi/retrieve/apikey?" + urlencode(data),
-                  headers=self.headers)
+        response = requests.get(API_DOMAIN + "/publicapi/retrieve/apikey", 
+                                params=data,
+                                headers=self.headers)
 
-        request = h.getresponse()
-        request_status = request.status
+        request_status = request.status_code
 
         if request_status == 200:
-            dom = minidom.parseString(request.read())
+            dom = minidom.parseString(request.text)
             code = dom.getElementsByTagName('prowl')[0].\
                             getElementsByTagName('success')[0].\
                             getAttribute('code')

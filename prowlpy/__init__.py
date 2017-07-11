@@ -31,8 +31,5 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from prowlpy import VERSION
-# This version will get tossed in 0.6
-__version__ = 0.52
-
-from prowlpy import Prowl
+from .prowlpy import VERSION
+from .prowlpy import Prowl
